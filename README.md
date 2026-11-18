@@ -12,6 +12,12 @@ Installs **SkyCAD Electrical** on Linux Mint / Ubuntu using Wine, with everythin
 bash <(curl -fsSL https://raw.githubusercontent.com/TheMarcoPisPolo/SkyCAD_Linux/main/install.sh)
 ```
 
+If it says `curl: command not found`, use this line instead:
+
+```bash
+bash <(wget -qO- https://raw.githubusercontent.com/TheMarcoPisPolo/SkyCAD_Linux/main/install.sh)
+```
+
 - It may ask for your password (to install Wine). The letters don't show while typing: that's normal.
 - It takes **15 to 40 minutes**. Some windows may pop up and close by themselves: let them.
 - When the **SkyCAD installer** opens, click **Install**, then close it when finished.
