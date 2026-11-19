@@ -33,12 +33,13 @@ This project fixes all of that. One script sets up a dedicated Wine environment 
 | **Disk space** | A few GB free (.NET and Wine take up most of it) |
 | **Internet** | Needed during installation |
 | **Account** | A normal user with `sudo` rights (it asks for your password once to install Wine) |
-| **SkyCAD** | `SkyCad_Setup.exe`, downloaded from SkyCAD's website |
+| **SkyCAD** | The installer from SkyCAD's website, renamed to `SkyCad_Setup.exe` |
 
 ## Installation
 
-1. Download **`SkyCad_Setup.exe`** from SkyCAD's website. Leave it in your **Downloads** folder.
-2. Open a **Terminal**, paste this command and press **Enter**:
+1. Download the SkyCAD installer from SkyCAD's website. Leave it in your **Downloads** folder.
+2. **Rename the file to exactly `SkyCad_Setup.exe`.** The script only finds it under that name.
+3. Open a **Terminal**, paste this command and press **Enter**:
 
    ```bash
    bash <(curl -fsSL https://raw.githubusercontent.com/TheMarcoPisPolo/SkyCAD_Linux/main/install.sh)
@@ -50,7 +51,7 @@ This project fixes all of that. One script sets up a dedicated Wine environment 
    bash <(wget -qO- https://raw.githubusercontent.com/TheMarcoPisPolo/SkyCAD_Linux/main/install.sh)
    ```
 
-3. When the **SkyCAD installer** window appears, click **Install**. Close the window when it's finished.
+4. When the **SkyCAD installer** window appears, click **Install**. Close the window when it's finished.
 
 **Good to know:**
 
