@@ -129,7 +129,8 @@ else
   wine "$SETUP" || true
   # Do NOT use "wineserver -w" here: the installer starts SkyCAD at the end, and that would
   # make this script wait until SkyCAD is closed. Only wait for the installer itself.
-  while pgrep -f -i '^[A-Z]:\\.*(msiexec|setup[^\\]*)\.exe' >/dev/null; do sleep 3; done
+  # (matches Windows process names like msiexec.exe / SkyCad_Setup.exe, not this script)
+  while pgrep -i 'msiexec|setup' >/dev/null; do sleep 3; done
   [[ -f "$PREFIX/$EXE_REL" ]] || die "SkyCAD was not installed (installer cancelled?). Run this script again."
 fi
 
