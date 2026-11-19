@@ -1,4 +1,4 @@
-# SkyCAD Electrical on Linux
+# SkyCAD Electrical on Linux (Still on Development)
 
 Installs **SkyCAD Electrical** on Linux Mint / Ubuntu using Wine, with everything it needs to work properly
 (drawing, placing parts, saving settings and remembering your login).
