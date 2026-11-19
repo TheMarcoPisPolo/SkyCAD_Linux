@@ -80,6 +80,12 @@ fi
 export PATH="$WINEBIN:$PATH" WINE="$WINEBIN/wine" WINESERVER="$WINEBIN/wineserver"
 say "Using $(wine --version) from $WINEBIN"
 
+if pgrep -f -i 'SkyCadElectrical\.exe' >/dev/null; then
+  warn "SkyCAD is running in this prefix - closing it so the installer can continue"
+  wineserver -k || true
+  sleep 2
+fi
+
 # ---------------------------------------------------------------- 3. latest winetricks
 mkdir -p "$TOOLS"
 say "Downloading the latest winetricks"
@@ -121,7 +127,9 @@ if [[ -f "$PREFIX/$EXE_REL" ]]; then
 else
   say "Starting the SkyCAD installer: click Install in the window that opens, then close it when finished"
   wine "$SETUP" || true
-  wineserver -w
+  # Do NOT use "wineserver -w" here: the installer starts SkyCAD at the end, and that would
+  # make this script wait until SkyCAD is closed. Only wait for the installer itself.
+  while pgrep -f -i '^[A-Z]:\\.*(msiexec|setup[^\\]*)\.exe' >/dev/null; do sleep 3; done
   [[ -f "$PREFIX/$EXE_REL" ]] || die "SkyCAD was not installed (installer cancelled?). Run this script again."
 fi
 
@@ -152,6 +160,8 @@ StartupWMClass=skycadelectrical.exe
 EOF
 
 DESK="$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")"
+# Remove the shortcuts Wine made: they start SkyCAD without clearing a stuck copy (-> crash).
+rm -f "$DESK/SkyCAD Electrical.desktop" "$HOME/.local/share/applications/wine/Programs/SkyCAD Electrical.desktop"
 if [[ -d "$DESK" ]]; then
   cp "$DESKTOP_FILE" "$DESK/"
   chmod +x "$DESK/skycad-electrical.desktop"
@@ -160,4 +170,6 @@ fi
 
 say "All done! Start SkyCAD from the 'SkyCAD Electrical' icon on your desktop or in the menu."
 echo "    (or type: $LAUNCHER)"
+echo "    If SkyCAD restarts itself after the first setup and does not come back, just start it"
+echo "    again from the icon."
 echo "    The first time, log in and tick \"Don't show at next start-up\" on the welcome screen."
