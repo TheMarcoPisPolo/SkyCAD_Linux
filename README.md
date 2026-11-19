@@ -1,4 +1,4 @@
-# SkyCAD Electrical for Linux
+# SkyCAD Electrical for Linux: install on Ubuntu and Linux Mint with Wine
 
 ![Status: in development](https://img.shields.io/badge/status-in%20development-orange)
 ![Platform: Linux Mint | Ubuntu](https://img.shields.io/badge/platform-Linux%20Mint%20%7C%20Ubuntu-green)
@@ -6,6 +6,8 @@
 ![Shell: Bash](https://img.shields.io/badge/shell-bash-lightgrey)
 
 A one-command installer that runs **SkyCAD Electrical**, the Windows program for electrical schematics and panel design, on **Linux Mint and Ubuntu** using Wine.
+
+Looking for **how to install SkyCAD on Linux**, or for a fix for SkyCAD not working in Wine (Internet Explorer 11 error, blank sheet, login not saved)? This script does the whole setup for you.
 
 ## What it is
 
@@ -97,6 +99,32 @@ This removes the SkyCAD Wine prefix, the launcher, and the menu and desktop icon
 | Arial, Courier New and Calibri fonts | **Essential.** Without them sheets stay blank, parts can't be placed, and SkyCAD hangs when you close it, so your settings and login are never saved. |
 | Windows 10 mode and IE11 registry values | The SkyCAD installer won't run without them |
 | `skycad` launcher | Closes any stuck copy of SkyCAD before starting a new one |
+
+## FAQ
+
+### Does SkyCAD Electrical work on Linux?
+Yes. SkyCAD Electrical is a Windows-only program, but it runs on Linux with Wine once the right Windows components are installed. This script installs them for you. Drawing, placing parts, saving settings and staying logged in all work.
+
+### Can I install SkyCAD on Ubuntu?
+Yes. The script works on Ubuntu and on Linux Mint, which is based on Ubuntu. It was tested on Linux Mint 22.3 (Ubuntu 24.04 base).
+
+### The SkyCAD installer says Internet Explorer 11 is required
+Wine doesn't report Internet Explorer 11 the way the SkyCAD installer expects. The script adds the IE11 registry values (`svcVersion` and `svcUpdateVersion`) so the installer runs.
+
+### SkyCAD opens in Wine but the sheet is blank and I can't place parts
+The Arial, Courier New and Calibri fonts are missing. The script installs them with winetricks (`corefonts` and `calibri`).
+
+### SkyCAD forgets my login and settings in Wine
+SkyCAD only saves its settings when it closes cleanly. Without the fonts above it hangs when closing, so nothing is saved. The fonts fix this too.
+
+### Wine says "could not load kernel32.dll, status c0000135"
+The Wine version from the software store is being used. The script installs and uses WineHQ stable instead.
+
+### SkyCAD crashes in Wine right after login
+SkyCAD needs the real .NET Framework 4.8. Wine's built-in Mono crashes with it. The script installs .NET 4.8 with winetricks.
+
+### Does this work with Bottles, PlayOnLinux or Lutris?
+Not tested. The script uses plain Wine with its own prefix (`~/.wine-skycad`). You can install the same components in another tool, using the table in [How it works](#how-it-works).
 
 ## Project status
 
