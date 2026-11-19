@@ -3,7 +3,7 @@
 Installs **SkyCAD Electrical** on Linux Mint / Ubuntu using Wine, with everything it needs to work properly
 (drawing, placing parts, saving settings and remembering your login).
 
-## Install (2 steps)
+## Install (3 steps)
 
 1. Download **`SkyCad_Setup.exe`** from SkyCAD's website and leave it in your **Downloads** folder.
 2. Rename the SkyCAD installer by "SkyCAD_Setup.exe"
