@@ -21,9 +21,11 @@ LOG="$HOME/skycad-install.log"
 
 say()  { printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }
 warn() { printf '\n\033[1;33m!!  %s\033[0m\n' "$*"; }
-die()  { printf '\n\033[1;31mXX  %s\033[0m\n' "$*"; exit 1; }
+die()  { trap - EXIT; printf '\n\033[1;31mXX  %s\033[0m\n' "$*"; exit 1; }
 
 export WINEPREFIX="$PREFIX" WINEDEBUG=-all
+export PATH="/opt/wine-stable/bin:$PATH"
+trap 'rc=$?; (( rc )) && printf "\n\033[1;31mXX  Stopped with an error (code %s). Run the same command again; if it fails again, send the end of %s.\033[0m\n" "$rc" "$LOG"' EXIT
 
 # ---------------------------------------------------------------- uninstall
 if [[ "${1:-}" == "--uninstall" ]]; then
@@ -58,14 +60,12 @@ for p in cabextract unzip curl wget p7zip-full; do
   dpkg -s "$p" >/dev/null 2>&1 || need_pkgs+=("$p")
 done
 
-wine_major=0
-if command -v wine >/dev/null; then
-  wine_major="$(wine --version | sed -E 's/^wine-([0-9]+).*/\1/')" || wine_major=0
-fi
-
-if (( wine_major < 9 )); then
+# Always use WineHQ's Wine in /opt/wine-stable. The Wine from the Mint/Ubuntu software store
+# (or a half-installed one) fails with "could not load kernel32.dll, status c0000135".
+WINEBIN=/opt/wine-stable/bin
+if [[ ! -x "$WINEBIN/wine" ]] || ! dpkg --print-foreign-architectures | grep -qx i386; then
   say "Installing Wine (WineHQ stable) - you may be asked for your password"
-  [[ -n "$CODENAME" ]] || die "Could not detect your Ubuntu base version. Install Wine 9+ manually, then rerun."
+  [[ -n "$CODENAME" ]] || die "Could not detect your Ubuntu base version. Install WineHQ stable manually, then rerun."
   sudo dpkg --add-architecture i386
   sudo mkdir -pm755 /etc/apt/keyrings
   sudo wget -qO /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
@@ -76,7 +76,9 @@ elif (( ${#need_pkgs[@]} )); then
   say "Installing helper packages: ${need_pkgs[*]} - you may be asked for your password"
   sudo apt-get install -y "${need_pkgs[@]}"
 fi
-say "Using $(wine --version)"
+[[ -x "$WINEBIN/wine" ]] || die "WineHQ Wine did not install correctly (missing $WINEBIN/wine)."
+export PATH="$WINEBIN:$PATH" WINE="$WINEBIN/wine" WINESERVER="$WINEBIN/wineserver"
+say "Using $(wine --version) from $WINEBIN"
 
 # ---------------------------------------------------------------- 3. latest winetricks
 mkdir -p "$TOOLS"
@@ -86,10 +88,13 @@ curl -fsSL -o "$WINETRICKS.new" https://raw.githubusercontent.com/Winetricks/win
   || { [[ -x "$WINETRICKS" ]] || die "Could not download winetricks (check your internet)."; }
 
 # ---------------------------------------------------------------- 4. Wine prefix + components
-if [[ ! -d "$PREFIX/drive_c" ]]; then
+if [[ ! -f "$PREFIX/drive_c/windows/system32/kernel32.dll" ]]; then
   say "Creating Wine prefix $PREFIX"
-  WINEARCH=win64 wineboot -i
-  wineserver -w
+  rm -rf "$PREFIX"   # leftover from a failed attempt
+  if ! WINEARCH=win64 wineboot -i || ! wineserver -w || [[ ! -d "$PREFIX/drive_c/windows" ]]; then
+    rm -rf "$PREFIX"
+    die "Wine could not create its Windows folder. Send the end of $LOG for help."
+  fi
 fi
 
 say "Installing Windows components (fonts, GDI+, .NET 4.8). This takes 15-40 minutes."
@@ -127,6 +132,7 @@ cat > "$LAUNCHER" <<EOF
 #!/usr/bin/env bash
 # Start SkyCAD Electrical. Clears a stuck copy left in the background first.
 export WINEPREFIX="$PREFIX"
+export PATH="$WINEBIN:\$PATH"
 if pgrep -f 'SkyCadElectrical.exe' >/dev/null; then wineserver -k; sleep 2; fi
 cd "\$WINEPREFIX/drive_c/Program Files/SkyCAD Electrical" || exit 1
 exec wine SkyCadElectrical.exe "\$@"
