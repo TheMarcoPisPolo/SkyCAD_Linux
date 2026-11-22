@@ -19,7 +19,7 @@ DESKTOP_FILE="$HOME/.local/share/applications/skycad-electrical.desktop"
 EXE_REL="drive_c/Program Files/SkyCAD Electrical/SkyCadElectrical.exe"
 LOG="$HOME/skycad-install.log"
 
-say()  { printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }
+say()  { printf '\n\033[1;32m==> [%s] %s\033[0m\n' "$(date +%H:%M:%S)" "$*"; }
 warn() { printf '\n\033[1;33m!!  %s\033[0m\n' "$*"; }
 die()  { trap - EXIT; printf '\n\033[1;31mXX  %s\033[0m\n' "$*"; exit 1; }
 
@@ -56,7 +56,8 @@ fi
 . /etc/os-release
 CODENAME="${UBUNTU_CODENAME:-${VERSION_CODENAME:-}}"
 need_pkgs=()
-for p in cabextract unzip curl wget p7zip-full; do
+# printer-driver-cups-pdf adds a "PDF" printer, so SkyCAD can print sheets to PDF files (~/PDF).
+for p in cabextract unzip curl wget p7zip-full printer-driver-cups-pdf; do
   dpkg -s "$p" >/dev/null 2>&1 || need_pkgs+=("$p")
 done
 
@@ -97,7 +98,9 @@ curl -fsSL -o "$WINETRICKS.new" https://raw.githubusercontent.com/Winetricks/win
 if [[ ! -f "$PREFIX/drive_c/windows/system32/kernel32.dll" ]]; then
   say "Creating Wine prefix $PREFIX"
   rm -rf "$PREFIX"   # leftover from a failed attempt
-  if ! WINEARCH=win64 wineboot -i || ! wineserver -w || [[ ! -d "$PREFIX/drive_c/windows" ]]; then
+  # mscoree= : don't install Wine Mono; dotnet48 would remove it again right away.
+  #            (Gecko is still installed: SkyCAD's login page needs it.)
+  if ! WINEDLLOVERRIDES="mscoree=" WINEARCH=win64 wineboot -i ||! wineserver -w || [[ ! -d "$PREFIX/drive_c/windows" ]]; then
     rm -rf "$PREFIX"
     die "Wine could not create its Windows folder. Send the end of $LOG for help."
   fi

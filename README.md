@@ -20,6 +20,7 @@ This project fixes all of that. One script sets up a dedicated Wine environment 
 - **Installs Wine** (WineHQ stable) if it's missing or broken. The Wine from the software store fails with SkyCAD.
 - **Creates a separate Wine prefix** in `~/.wine-skycad`, so SkyCAD can't interfere with your other Wine programs.
 - **Installs the Windows parts SkyCAD needs:** .NET Framework 4.8, Microsoft GDI+, and the Arial, Courier New and Calibri fonts.
+- **Adds a "PDF" printer**, so you can print sheets to PDF files (saved in `~/PDF`).
 - **Prepares the system for the SkyCAD installer:** sets Windows 10 mode and the Internet Explorer 11 registry values. Without them the installer refuses to run.
 - **Runs your SkyCAD installer.**
 - **Adds a `skycad` launcher**, plus desktop and menu icons. The launcher closes any stuck copy of SkyCAD before it starts a new one.
@@ -96,6 +97,7 @@ This removes the SkyCAD Wine prefix, the launcher, and the menu and desktop icon
 | Wine 9+ (WineHQ stable) | Runs Windows programs on Linux |
 | .NET Framework 4.8 | SkyCAD is a .NET program. Wine's built-in Mono crashes when running it. |
 | Microsoft GDI+ | Draws the sheets |
+| "PDF" printer (cups-pdf) | Lets SkyCAD print sheets to PDF files, saved in `~/PDF` |
 | Arial, Courier New and Calibri fonts | **Essential.** Without them sheets stay blank, parts can't be placed, and SkyCAD hangs when you close it, so your settings and login are never saved. |
 | Windows 10 mode and IE11 registry values | The SkyCAD installer won't run without them |
 | `skycad` launcher | Closes any stuck copy of SkyCAD before starting a new one |
