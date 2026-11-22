@@ -1,6 +1,6 @@
 # SkyCAD Electrical for Linux: install on Ubuntu and Linux Mint with Wine
 
-![Status: in development](https://img.shields.io/badge/status-in%20development-orange)
+![Status: v1.0, development paused](https://img.shields.io/badge/status-v1.0%20%7C%20development%20paused-blue)
 ![Platform: Linux Mint | Ubuntu](https://img.shields.io/badge/platform-Linux%20Mint%20%7C%20Ubuntu-green)
 ![Runs on: Wine](https://img.shields.io/badge/runs%20on-Wine%209%2B-red)
 ![Shell: Bash](https://img.shields.io/badge/shell-bash-lightgrey)
@@ -130,7 +130,9 @@ Not tested. The script uses plain Wine with its own prefix (`~/.wine-skycad`). Y
 
 ## Project status
 
-This project is still in development. Installing, drawing, placing parts, printing to PDF, saving settings and staying logged in all work on Linux Mint 22.3. Other distributions and versions haven't been tested yet. If you try one, please report how it went.
+**Version 1.0 — development is paused for now.** The installer works: installing, drawing, placing parts, printing to PDF, saving settings and staying logged in all work on Linux Mint 22.3 (Ubuntu 24.04 base).
+
+No new features are planned at the moment, and other distributions and versions haven't been tested. You can still open an [issue](https://github.com/TheMarcoPisPolo/SkyCAD_Linux/issues) to report a problem or share how it went on your system, but replies may be slow.
 
 ## Disclaimer
 
