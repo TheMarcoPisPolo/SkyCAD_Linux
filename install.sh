@@ -57,8 +57,7 @@ fi
 CODENAME="${UBUNTU_CODENAME:-${VERSION_CODENAME:-}}"
 need_pkgs=()
 # printer-driver-cups-pdf adds a "PDF" printer, so SkyCAD can print sheets to PDF files (~/PDF).
-# zenity shows the "Save as" window for PDFs.
-for p in cabextract unzip curl wget p7zip-full printer-driver-cups-pdf zenity; do
+for p in cabextract unzip curl wget p7zip-full printer-driver-cups-pdf; do
   dpkg -s "$p" >/dev/null 2>&1 || need_pkgs+=("$p")
 done
 
@@ -138,53 +137,7 @@ else
   [[ -f "$PREFIX/$EXE_REL" ]] || die "SkyCAD was not installed (installer cancelled?). Run this script again."
 fi
 
-# ---------------------------------------------------------------- 6. PDF "Save as" helper
-# The PDF printer always writes to ~/PDF. This helper asks where to save each new PDF instead.
-PDF_HELPER="$TOOLS/pdf-save-as.sh"
-cat > "$PDF_HELPER" <<'HELPER'
-#!/usr/bin/env bash
-# SkyCAD on Linux: ask where to save each PDF printed to the "PDF" printer.
-# The PDF printer (cups-pdf) always writes to ~/PDF; this moves each new file where you choose.
-OUT="$HOME/PDF"
-STATE="$HOME/.config/skycad-linux"
-LAST="$STATE/last-pdf-folder"
-mkdir -p "$OUT" "$STATE"
-exec 9>"$STATE/pdf-save-as.lock"; flock -n 9 || exit 0   # only one copy
-
-handle() {
-  local f="$1" dir name dest
-  [[ -f "$f" && "$f" == *.pdf ]] || return
-  dir="$(cat "$LAST" 2>/dev/null)"; [[ -d "$dir" ]] || dir="$(xdg-user-dir DOCUMENTS 2>/dev/null || echo "$HOME")"
-  name="SkyCAD $(date '+%Y-%m-%d %H-%M').pdf"
-  dest="$(zenity --file-selection --save --confirm-overwrite --title="Save the PDF from SkyCAD" \
-          --filename="$dir/$name" --file-filter="PDF files | *.pdf" 2>/dev/null)" || {
-    notify-send -i document-save "PDF kept in ~/PDF" "$(basename "$f")" 2>/dev/null; return; }
-  [[ "$dest" == *.[pP][dD][fF] ]] || dest="$dest.pdf"
-  if mv -f "$f" "$dest"; then
-    dirname "$dest" > "$LAST"
-    notify-send -i document-save "PDF saved" "$dest" 2>/dev/null
-  else
-    zenity --error --text="Could not save to:\n$dest\n\nThe PDF is still in ~/PDF." 2>/dev/null
-  fi
-}
-
-# Check the folder every 2 seconds (no extra packages needed). Files already there at start are left alone.
-shopt -s nullglob
-declare -A seen; for f in "$OUT"/*.pdf; do seen["$f"]=1; done
-while sleep 2; do
-  for f in "$OUT"/*.pdf; do
-    [[ -n "${seen[$f]:-}" ]] && continue
-    # wait until cups-pdf has finished writing (size stable)
-    s1=$(stat -c %s "$f" 2>/dev/null); sleep 1; s2=$(stat -c %s "$f" 2>/dev/null)
-    [[ -n "$s1" && "$s1" == "$s2" && "$s1" -gt 0 ]] || continue
-    seen["$f"]=1
-    handle "$f"
-  done
-done
-HELPER
-chmod +x "$PDF_HELPER"
-
-# ---------------------------------------------------------------- 7. launcher + menu/desktop icon
+# ---------------------------------------------------------------- 6. launcher + menu/desktop icon
 say "Creating the SkyCAD launcher and menu entry"
 mkdir -p "$(dirname "$LAUNCHER")" "$(dirname "$DESKTOP_FILE")"
 cat > "$LAUNCHER" <<EOF
@@ -193,8 +146,6 @@ cat > "$LAUNCHER" <<EOF
 export WINEPREFIX="$PREFIX"
 export PATH="$WINEBIN:\$PATH"
 if pgrep -f 'SkyCadElectrical.exe' >/dev/null; then wineserver -k; sleep 2; fi
-# Ask where to save PDFs printed to the "PDF" printer (only one copy runs).
-setsid "$PDF_HELPER" >/dev/null 2>&1 </dev/null &
 cd "\$WINEPREFIX/drive_c/Program Files/SkyCAD Electrical" || exit 1
 exec wine SkyCadElectrical.exe "\$@"
 EOF
