@@ -130,7 +130,7 @@ Not tested. The script uses plain Wine with its own prefix (`~/.wine-skycad`). Y
 
 ## Project status
 
-This project is still in development. Installing, drawing, placing parts, saving settings and staying logged in all work on Linux Mint 22.3. Other distributions and versions haven't been tested yet. If you try one, please report how it went.
+This project is still in development. Installing, drawing, placing parts, printing to PDF, saving settings and staying logged in all work on Linux Mint 22.3. Other distributions and versions haven't been tested yet. If you try one, please report how it went.
 
 ## Disclaimer
 
